@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Bar Chart Race Animation with D3.js</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+                height: 100vh;
+                margin: 0;
+            }
+            .title {
+                text-align: center;
+                padding: 10px;
+                font-size: 24px;
+                font-weight: bold;
+                border-bottom: 2px solid #ddd; /* Border below the title */
+            }
+            .bar {
+                stroke: #fff;
+                stroke-width: 1px;
+            }
+            .highlighted {
+                fill-opacity: 1;
+                stroke: #000;
+                stroke-width: 1px;
+            }
+            .transparent {
+                fill-opacity: 0.3;
+            }
+            .axis path, .axis line {
+                fill: none;
+                shape-rendering: crispEdges;
+            }
+            .legend {
+                font-size: 12px;
+            }
+            .legend-item {
+                display: inline-block;
+                margin: 5px;
+                padding: 5px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                cursor: pointer;
+                color: #fff;
+                font-weight: bold;
+            }
+            .legend rect {
+                stroke: #000;
+                stroke-width: 1px;
+            }
+            .legend-item:hover {
+                background-color: #333;
+            }
+            .year-label {
+                font-size: 16px;
+                font-weight: bold;
+            }
+            button {
+                margin: 20px;
+                padding: 10px 20px;
+                font-size: 24px; /* Increase font size for icons */
+                cursor: pointer;
+                border: none; /* Remove default border */
+                background: transparent; /* Make background transparent */
+            }
+        </style>
+    </head>
+    <body>
+        <div class="title">台灣CDC民國110-111年口服流感藥物使用統計</div>
+        <svg width="800" height="500"></svg>
+        <div class="button-container">
+            <button id="startAnimation">Play</button>
+            <button id="stopAnimation">Pause</button>
+        </div>
+
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+        <script>    
+                    const data = [
+                                    {
+                                        "category": "East",
+                                        "count-eraflu": 12,
+                                        "count-tamiflu": 16,
+                                        "set": 1,
+                                        "year": "2021-1"
+                                    },
+                                    {
+                                        "category": "Kaohisung/Pingtung",
+                                        "count-eraflu": 107,
+                                        "count-tamiflu": 10,
+                                        "set": 1,
+                                        "year": "2021-1"
+                                    },
+                                    {
+                                        "category": "South",
+                                        "count-eraflu": 147,
+                                        "count-tamiflu": 5,
+                                        "set": 1,
+                                        "year": "2021-1"
+                                    },
+                                    {
+                                        "category": "Middle",
+                                        "count-eraflu": 283,
+                                        "count-tamiflu": 19,
+                                        "set": 1,
+                                        "year": "2021-1"
+                                    },
+                                    {
+                                        "category": "North",
+                                        "count-eraflu": 348,
+                                        "count-tamiflu": 71,
+                                        "set": 1,
+                                        "year": "2021-1"
+                                    },
+                                    {
+                                        "category": "Taipei",
+                                        "count-eraflu": 554,
+                                        "count-tamiflu": 70,
+                                        "set": 1,
+                                        "year": "2021-1"
+                                    },
+                                    {
+                                        "category": "East",
+                                        "count-eraflu": 21,
+                                        "count-tamiflu": 28,
+                                        "set": 1,
+                                        "year": "2021-2"
+                                    },
+                                    {
+                                        "category": "Kaohisung/Pingtung",
+                                        "count-eraflu": 181,
+                                        "count-tamiflu": 14,
+                                        "set": 1,
+                                        "year": "2021-2"
+                                    },
+                                    {
+                                        "category": "South",
+                                        "count-eraflu": 271,
+                                        "count-tamiflu": 26,
+                                        "set": 1,
+                                        "year": "2021-2"
+                                    },
+                                    {
+                                        "category": "Middle",
+                                        "count-eraflu": 510,
+                                        "count-tamiflu": 27,
+                                        "set": 1,
+                                        "year": "2021-2"
+                                    },
+                                    {
+                                        "category": "North",
+                                        "count-eraflu": 537,
+                                        "count-tamiflu": 121,
+                                        "set": 1,
+                                        "year": "2021-2"
+                                    },
+                                    {
+                                        "category": "Taipei",
+                                        "count-eraflu": 900,
+                                        "count-tamiflu": 130,
+                                        "set": 1,
+                                        "year": "2021-2"
+                                    },
+                                    {
+                                        "category": "East",
+                                        "count-eraflu": 23,
+                                        "count-tamiflu": 40,
+                                        "set": 1,
+                                        "year": "2021-3"
+                                    },
+                                    {
+                                        "category": "Kaohisung/Pingtung",
+                                        "count-eraflu": 247,
+                                        "count-tamiflu": 27,
+                                        "set": 1,
+                                        "year": "2021-3"
+                                    },
+                                    {
+                                        "category": "South",
+                                        "count-eraflu": 390,
+                                        "count-tamiflu": 38,
+                                        "set": 1,
+                                        "year": "2021-3"
+                                    },
+                                    {
+                                        "category": "Middle",
+                                        "count-eraflu": 731,
+                                        "count-tamiflu": 38,
+                                        "set": 1,
+                                        "year": "2021-3"
+                                    },
+                                    {
+                                        "category": "North",
+                                        "count-eraflu": 668,
+                                        "count-tamiflu": 236,
+                                        "set": 1,
+                                        "year": "2021-3"
+                                    },
+                                    {
+                                        "category": "Taipei",
+                                        "count-eraflu": 1322,
+                                        "count-tamiflu": 172,
+                                        "set": 1,
+                                        "year": "2021-3"
+                                    },
+                                    {
+                                        "category": "East",
+                                        "count-eraflu": 25,
+                                        "count-tamiflu": 51,
+                                        "set": 1,
+                                        "year": "2021-4"
+                                    },
+                                    {
+                                        "category": "Kaohisung/Pingtung",
+                                        "count-eraflu": 311,
+                                        "count-tamiflu": 35,
+                                        "set": 1,
+                                        "year": "2021-4"
+                                    },
+                                    {
+                                        "category": "South",
+                                        "count-eraflu": 495,
+                                        "count-tamiflu": 51,
+                                        "set": 1,
+                                        "year": "2021-4"
+                                    },
+                                    {
+                                        "category": "Middle",
+                                        "count-eraflu": 934,
+                                        "count-tamiflu": 38,
+                                        "set": 1,
+                                        "year": "2021-4"
+                                    },
+                                    {
+                                        "category": "North",
+                                        "count-eraflu": 786,
+                                        "count-tamiflu": 356,
+                                        "set": 1,
+                                        "year": "2021-4"
+                                    },
+                                    {
+                                        "category": "Taipei",
+                                        "count-eraflu": 1735,
+                                        "count-tamiflu": 199,
+                                        "set": 1,
+                                        "year": "2021-4"
+                                    },
+                                    {
+                                        "category": "East",
+                                        "count-eraflu": 31,
+                                        "count-tamiflu": 55,
+                                        "set": 1,
+                                        "year": "2021-5"
+                                    },
+                                    {
+                                        "category": "Kaohisung/Pingtung",
+                                        "count-eraflu": 356,
+                                        "count-tamiflu": 36,
+                                        "set": 1,
+                                        "year": "2021-5"
+                                    },
+                                    {
+                                        "category": "South",
+                                        "count-eraflu": 572,
+                                        "count-tamiflu": 67,
+                                        "set": 1,
+                                        "year": "2021-5"
+                                    },
+                                    {
+                                        "category": "Middle",
+                                        "count-eraflu": 1148,
+                                        "count-tamiflu": 53,
+                                        "set": 1,
+                                        "year": "2021-5"
+                                    },
+                                    {
+                                        "category": "North",
+                                        "count-eraflu": 926,
+                                        "count-tamiflu": 464,
+                                        "set": 1,
+                                        "year": "2021-5"
+                                    },
+                                    {
+                                        "category": "Taipei",
+                                        "count-eraflu": 2016,
+                                        "count-tamiflu": 225,
+                                        "set": 1,
+                                        "year": "2021-5"
+                                    },
+                                    {
+                                        "category": "East",
+                                        "count-eraflu": 34,
+                                        "count-tamiflu": 55,
+                                        "set": 1,
+                                        "year": "2021-6"
+                                    },
+                                    {
+                                        "category": "Kaohisung/Pingtung",
+                                        "count-eraflu": 375,
+                                        "count-tamiflu": 37,
+                                        "set": 1,
+                                        "year": "2021-6"
+                                    },
+                                    {
+                                        "category": "South",
+                                        "count-eraflu": 605,
+                                        "count-tamiflu": 74,
+                                        "set": 1,
+                                        "year": "2021-6"
+                                    },
+                                    {
+                                        "category": "Middle",
+                                        "count-eraflu": 1243,
+                                        "count-tamiflu": 58,
+                                        "set": 1,
+                                        "year": "2021-6"
+                                    },
+                                    {
+                                        "category": "North",
+                                        "count-eraflu": 965,
+                                        "count-tamiflu": 498,
+                                        "set": 1,
+                                        "year": "2021-6"
+                                    },
+                                    {
+                                        "category": "Taipei",
+                                        "count-eraflu": 2089,
+                                        "count-tamiflu": 242,
+                                        "set": 1,
+                                        "year": "2021-6"
+                                    },
+                                    {
+                                        "category": "East",
+                                        "count-eraflu": 34,
+                                        "count-tamiflu": 56,
+                                        "set": 1,
+                                        "year": "2021-7"
+                                    },
+                                    {
+                                        "category": "Kaohisung/Pingtung",
+                                        "count-eraflu": 387,
+                                        "count-tamiflu": 39,
+                                        "set": 1,
+                                        "year": "2021-7"
+                                    },
+                                    {
+                                        "category": "South",
+                                        "count-eraflu": 627,
+                                        "count-tamiflu": 76,
+                                        "set": 1,
+                                        "year": "2021-7"
+                                    },
+                                    {
+                                        "category": "Middle",
+                                        "count-eraflu": 1311,
+                                        "count-tamiflu": 58,
+                                        "set": 1,
+                                        "year": "2021-7"
+                                    },
+                                    {
+                                        "category": "North",
+                                        "count-eraflu": 1016,
+                                        "count-tamiflu": 499,
+                                        "set": 1,
+                                        "year": "2021-7"
+                                    },
+                                    {
+                                        "category": "Taipei",
+                                        "count-eraflu": 2156,
+                                        "count-tamiflu": 247,
+                                        "set": 1,
+                                        "year": "2021-7"
+                                    },
+                                    {
+                                        "category": "East",
+                                        "count-eraflu": 39,
+                                        "count-tamiflu": 59,
+                                        "set": 1,
+                                        "year": "2021-8"
+                                    },
+                                    {
+                                        "category": "Kaohisung/Pingtung",
+                                        "count-eraflu": 408,
+                                        "count-tamiflu": 39,
+                                        "set": 1,
+                                        "year": "2021-8"
+                                    },
+                                    {
+                                        "category": "South",
+                                        "count-eraflu": 658,
+                                        "count-tamiflu": 77,
+                                        "set": 1,
+                                        "year": "2021-8"
+                                    },
+                                    {
+                                        "category": "Middle",
+                                        "count-eraflu": 1380,
+                                        "count-tamiflu": 58,
+                                        "set": 1,
+                                        "year": "2021-8"
+                                    },
+                                    {
+                                        "category": "North",
+                                        "count-eraflu": 1065,
+                                        "count-tamiflu": 499,
+                                        "set": 1,
+                                        "year": "2021-8"
+                                    },
+                                    {
+                                        "category": "Taipei",
+                                        "count-eraflu": 2241,
+                                        "count-tamiflu": 255,
+                                        "set": 1,
+                                        "year": "2021-8"
+                                    },
+                                    {
+                                        "category": "East",
+                                        "count-eraflu": 44,
+                                        "count-tamiflu": 60,
+                                        "set": 1,
+                                        "year": "2021-9"
+                                    },
+                                    {
+                                        "category": "Kaohisung/Pingtung",
+                                        "count-eraflu": 423,
+                                        "count-tamiflu": 43,
+                                        "set": 1,
+                                        "year": "2021-9"
+                                    },
+                                    {
+                                        "category": "South",
+                                        "count-eraflu": 675,
+                                        "count-tamiflu": 84,
+                                        "set": 1,
+                                        "year": "2021-9"
+                                    },
+                                    {
+                                        "category": "Middle",
+                                        "count-eraflu": 1436,
+                                        "count-tamiflu": 62,
+                                        "set": 1,
+                                        "year": "2021-9"
+                                    },
+                                    {
+                                        "category": "North",
+                                        "count-eraflu": 1089,
+                                        "count-tamiflu": 514,
+                                        "set": 1,
+                                        "year": "2021-9"
+                                    },
+                                    {
+                                        "category": "Taipei",
+                                        "count-eraflu": 2303,
+                                        "count-tamiflu": 278,
+                                        "set": 1,
+                                        "year": "2021-9"
+                                    },
+                                    {
+                                        "category": "East",
+                                        "count-eraflu": 44,
+                                        "count-tamiflu": 63,
+                                        "set": 1,
+                                        "year": "2021-10"
+                                    },
+                                    {
+                                        "category": "Kaohisung/Pingtung",
+                                        "count-eraflu": 423,
+                                        "count-tamiflu": 61,
+                                        "set": 1,
+                                        "year": "2021-10"
+                                    },
+                                    {
+                                        "category": "South",
+                                        "count-eraflu": 677,
+                                        "count-tamiflu": 117,
+                                        "set": 1,
+                                        "year": "2021-10"
+                                    },
+                                    {
+                                        "category": "Middle",
+                                        "count-eraflu": 1460,
+                                        "count-tamiflu": 139,
+                                        "set": 1,
+                                        "year": "2021-10"
+                                    },
+                                    {
+                                        "category": "North",
+                                        "count-eraflu": 1089,
+                                        "count-tamiflu": 590,
+                                        "set": 1,
+                                        "year": "2021-10"
+                                    },
+                                    {
+                                        "category": "Taipei",
+                                        "count-eraflu": 2313,
+                                        "count-tamiflu": 341,
+                                        "set": 1,
+                                        "year": "2021-10"
+                                    },
+                                    {
+                                        "category": "East",
+                                        "count-eraflu": 44,
+                                        "count-tamiflu": 68,
+                                        "set": 1,
+                                        "year": "2021-11"
+                                    },
+                                    {
+                                        "category": "Kaohisung/Pingtung",
+                                        "count-eraflu": 423,
+                                        "count-tamiflu": 78,
+                                        "set": 1,
+                                        "year": "2021-11"
+                                    },
+                                    {
+                                        "category": "South",
+                                        "count-eraflu": 680,
+                                        "count-tamiflu": 148,
+                                        "set": 1,
+                                        "year": "2021-11"
+                                    },
+                                    {
+                                        "category": "Middle",
+                                        "count-eraflu": 1460,
+                                        "count-tamiflu": 207,
+                                        "set": 1,
+                                        "year": "2021-11"
+                                    },
+                                    {
+                                        "category": "North",
+                                        "count-eraflu": 1089,
+                                        "count-tamiflu": 663,
+                                        "set": 1,
+                                        "year": "2021-11"
+                                    },
+                                    {
+                                        "category": "Taipei",
+                                        "count-eraflu": 2313,
+                                        "count-tamiflu": 435,
+                                        "set": 1,
+                                        "year": "2021-11"
+                                    },
+                                    {
+                                        "category": "East",
+                                        "count-eraflu": 44,
+                                        "count-tamiflu": 78,
+                                        "set": 1,
+                                        "year": "2021-12"
+                                    },
+                                    {
+                                        "category": "Kaohisung/Pingtung",
+                                        "count-eraflu": 423,
+                                        "count-tamiflu": 101,
+                                        "set": 1,
+                                        "year": "2021-12"
+                                    },
+                                    {
+                                        "category": "South",
+                                        "count-eraflu": 681,
+                                        "count-tamiflu": 195,
+                                        "set": 1,
+                                        "year": "2021-12"
+                                    },
+                                    {
+                                        "category": "Middle",
+                                        "count-eraflu": 1460,
+                                        "count-tamiflu": 295,
+                                        "set": 1,
+                                        "year": "2021-12"
+                                    },
+                                    {
+                                        "category": "North",
+                                        "count-eraflu": 1089,
+                                        "count-tamiflu": 764,
+                                        "set": 1,
+                                        "year": "2021-12"
+                                    },
+                                    {
+                                        "category": "Taipei",
+                                        "count-eraflu": 2313,
+                                        "count-tamiflu": 561,
+                                        "set": 1,
+                                        "year": "2021-12"
+                                    },
+                                    {
+                                        "category": "East",
+                                        "count-eraflu": 44,
+                                        "count-tamiflu": 86,
+                                        "set": 1,
+                                        "year": "2022-1"
+                                    },
+                                    {
+                                        "category": "Kaohisung/Pingtung",
+                                        "count-eraflu": 423,
+                                        "count-tamiflu": 132,
+                                        "set": 1,
+                                        "year": "2022-1"
+                                    },
+                                    {
+                                        "category": "South",
+                                        "count-eraflu": 690,
+                                        "count-tamiflu": 246,
+                                        "set": 1,
+                                        "year": "2022-1"
+                                    },
+                                    {
+                                        "category": "Middle",
+                                        "count-eraflu": 1460,
+                                        "count-tamiflu": 400,
+                                        "set": 1,
+                                        "year": "2022-1"
+                                    },
+                                    {
+                                        "category": "North",
+                                        "count-eraflu": 1089,
+                                        "count-tamiflu": 872,
+                                        "set": 1,
+                                        "year": "2022-1"
+                                    },
+                                    {
+                                        "category": "Taipei",
+                                        "count-eraflu": 2313,
+                                        "count-tamiflu": 703,
+                                        "set": 1,
+                                        "year": "2022-1"
+                                    },
+                                    {
+                                        "category": "East",
+                                        "count-eraflu": 44,
+                                        "count-tamiflu": 91,
+                                        "set": 1,
+                                        "year": "2022-2"
+                                    },
+                                    {
+                                        "category": "Kaohisung/Pingtung",
+                                        "count-eraflu": 423,
+                                        "count-tamiflu": 139,
+                                        "set": 1,
+                                        "year": "2022-2"
+                                    },
+                                    {
+                                        "category": "South",
+                                        "count-eraflu": 694,
+                                        "count-tamiflu": 279,
+                                        "set": 1,
+                                        "year": "2022-2"
+                                    },
+                                    {
+                                        "category": "Middle",
+                                        "count-eraflu": 1460,
+                                        "count-tamiflu": 454,
+                                        "set": 1,
+                                        "year": "2022-2"
+                                    },
+                                    {
+                                        "category": "North",
+                                        "count-eraflu": 1089,
+                                        "count-tamiflu": 925,
+                                        "set": 1,
+                                        "year": "2022-2"
+                                    },
+                                    {
+                                        "category": "Taipei",
+                                        "count-eraflu": 2313,
+                                        "count-tamiflu": 780,
+                                        "set": 1,
+                                        "year": "2022-2"
+                                    },
+                                    {
+                                        "category": "East",
+                                        "count-eraflu": 44,
+                                        "count-tamiflu": 94,
+                                        "set": 1,
+                                        "year": "2022-3"
+                                    },
+                                    {
+                                        "category": "Kaohisung/Pingtung",
+                                        "count-eraflu": 423,
+                                        "count-tamiflu": 163,
+                                        "set": 1,
+                                        "year": "2022-3"
+                                    },
+                                    {
+                                        "category": "South",
+                                        "count-eraflu": 696,
+                                        "count-tamiflu": 306,
+                                        "set": 1,
+                                        "year": "2022-3"
+                                    },
+                                    {
+                                        "category": "Middle",
+                                        "count-eraflu": 1460,
+                                        "count-tamiflu": 530,
+                                        "set": 1,
+                                        "year": "2022-3"
+                                    },
+                                    {
+                                        "category": "North",
+                                        "count-eraflu": 1089,
+                                        "count-tamiflu": 1001,
+                                        "set": 1,
+                                        "year": "2022-3"
+                                    },
+                                    {
+                                        "category": "Taipei",
+                                        "count-eraflu": 2313,
+                                        "count-tamiflu": 877,
+                                        "set": 1,
+                                        "year": "2022-3"
+                                    },
+                                    {
+                                        "category": "East",
+                                        "count-eraflu": 44,
+                                        "count-tamiflu": 95,
+                                        "set": 1,
+                                        "year": "2022-4"
+                                    },
+                                    {
+                                        "category": "Kaohisung/Pingtung",
+                                        "count-eraflu": 423,
+                                        "count-tamiflu": 171,
+                                        "set": 1,
+                                        "year": "2022-4"
+                                    },
+                                    {
+                                        "category": "South",
+                                        "count-eraflu": 698,
+                                        "count-tamiflu": 330,
+                                        "set": 1,
+                                        "year": "2022-4"
+                                    },
+                                    {
+                                        "category": "Middle",
+                                        "count-eraflu": 1460,
+                                        "count-tamiflu": 610,
+                                        "set": 1,
+                                        "year": "2022-4"
+                                    },
+                                    {
+                                        "category": "North",
+                                        "count-eraflu": 1089,
+                                        "count-tamiflu": 1074,
+                                        "set": 1,
+                                        "year": "2022-4"
+                                    },
+                                    {
+                                        "category": "Taipei",
+                                        "count-eraflu": 2314,
+                                        "count-tamiflu": 981,
+                                        "set": 1,
+                                        "year": "2022-4"
+                                    },
+                                    {
+                                        "category": "East",
+                                        "count-eraflu": 44,
+                                        "count-tamiflu": 95,
+                                        "set": 1,
+                                        "year": "2022-5"
+                                    },
+                                    {
+                                        "category": "Kaohisung/Pingtung",
+                                        "count-eraflu": 423,
+                                        "count-tamiflu": 191,
+                                        "set": 1,
+                                        "year": "2022-5"
+                                    },
+                                    {
+                                        "category": "South",
+                                        "count-eraflu": 701,
+                                        "count-tamiflu": 360,
+                                        "set": 1,
+                                        "year": "2022-5"
+                                    },
+                                    {
+                                        "category": "Middle",
+                                        "count-eraflu": 1460,
+                                        "count-tamiflu": 776,
+                                        "set": 1,
+                                        "year": "2022-5"
+                                    },
+                                    {
+                                        "category": "North",
+                                        "count-eraflu": 1089,
+                                        "count-tamiflu": 1148,
+                                        "set": 1,
+                                        "year": "2022-5"
+                                    },
+                                    {
+                                        "category": "Taipei",
+                                        "count-eraflu": 2314,
+                                        "count-tamiflu": 1043,
+                                        "set": 1,
+                                        "year": "2022-5"
+                                    },
+                                    {
+                                        "category": "East",
+                                        "count-eraflu": 44,
+                                        "count-tamiflu": 96,
+                                        "set": 1,
+                                        "year": "2022-6"
+                                    },
+                                    {
+                                        "category": "Kaohisung/Pingtung",
+                                        "count-eraflu": 423,
+                                        "count-tamiflu": 193,
+                                        "set": 1,
+                                        "year": "2022-6"
+                                    },
+                                    {
+                                        "category": "South",
+                                        "count-eraflu": 702,
+                                        "count-tamiflu": 388,
+                                        "set": 1,
+                                        "year": "2022-6"
+                                    },
+                                    {
+                                        "category": "North",
+                                        "count-eraflu": 1089,
+                                        "count-tamiflu": 1217,
+                                        "set": 1,
+                                        "year": "2022-6"
+                                    },
+                                    {
+                                        "category": "Middle",
+                                        "count-eraflu": 1460,
+                                        "count-tamiflu": 961,
+                                        "set": 1,
+                                        "year": "2022-6"
+                                    },
+                                    {
+                                        "category": "Taipei",
+                                        "count-eraflu": 2314,
+                                        "count-tamiflu": 1062,
+                                        "set": 1,
+                                        "year": "2022-6"
+                                    },
+                                    {
+                                        "category": "East",
+                                        "count-eraflu": 44,
+                                        "count-tamiflu": 100,
+                                        "set": 1,
+                                        "year": "2022-7"
+                                    },
+                                    {
+                                        "category": "Kaohisung/Pingtung",
+                                        "count-eraflu": 423,
+                                        "count-tamiflu": 196,
+                                        "set": 1,
+                                        "year": "2022-7"
+                                    },
+                                    {
+                                        "category": "South",
+                                        "count-eraflu": 702,
+                                        "count-tamiflu": 399,
+                                        "set": 1,
+                                        "year": "2022-7"
+                                    },
+                                    {
+                                        "category": "North",
+                                        "count-eraflu": 1089,
+                                        "count-tamiflu": 1269,
+                                        "set": 1,
+                                        "year": "2022-7"
+                                    },
+                                    {
+                                        "category": "Middle",
+                                        "count-eraflu": 1460,
+                                        "count-tamiflu": 1068,
+                                        "set": 1,
+                                        "year": "2022-7"
+                                    },
+                                    {
+                                        "category": "Taipei",
+                                        "count-eraflu": 2314,
+                                        "count-tamiflu": 1091,
+                                        "set": 1,
+                                        "year": "2022-7"
+                                    },
+                                    {
+                                        "category": "East",
+                                        "count-eraflu": 44,
+                                        "count-tamiflu": 105,
+                                        "set": 1,
+                                        "year": "2022-8"
+                                    },
+                                    {
+                                        "category": "Kaohisung/Pingtung",
+                                        "count-eraflu": 423,
+                                        "count-tamiflu": 205,
+                                        "set": 1,
+                                        "year": "2022-8"
+                                    },
+                                    {
+                                        "category": "South",
+                                        "count-eraflu": 702,
+                                        "count-tamiflu": 407,
+                                        "set": 1,
+                                        "year": "2022-8"
+                                    },
+                                    {
+                                        "category": "North",
+                                        "count-eraflu": 1089,
+                                        "count-tamiflu": 1320,
+                                        "set": 1,
+                                        "year": "2022-8"
+                                    },
+                                    {
+                                        "category": "Middle",
+                                        "count-eraflu": 1460,
+                                        "count-tamiflu": 1142,
+                                        "set": 1,
+                                        "year": "2022-8"
+                                    },
+                                    {
+                                        "category": "Taipei",
+                                        "count-eraflu": 2314,
+                                        "count-tamiflu": 1138,
+                                        "set": 1,
+                                        "year": "2022-8"
+                                    },
+                                    {
+                                        "category": "East",
+                                        "count-eraflu": 44,
+                                        "count-tamiflu": 121,
+                                        "set": 1,
+                                        "year": "2022-9"
+                                    },
+                                    {
+                                        "category": "Kaohisung/Pingtung",
+                                        "count-eraflu": 423,
+                                        "count-tamiflu": 253,
+                                        "set": 1,
+                                        "year": "2022-9"
+                                    },
+                                    {
+                                        "category": "South",
+                                        "count-eraflu": 702,
+                                        "count-tamiflu": 445,
+                                        "set": 1,
+                                        "year": "2022-9"
+                                    },
+                                    {
+                                        "category": "North",
+                                        "count-eraflu": 1089,
+                                        "count-tamiflu": 1448,
+                                        "set": 1,
+                                        "year": "2022-9"
+                                    },
+                                    {
+                                        "category": "Middle",
+                                        "count-eraflu": 1460,
+                                        "count-tamiflu": 1289,
+                                        "set": 1,
+                                        "year": "2022-9"
+                                    },
+                                    {
+                                        "category": "Taipei",
+                                        "count-eraflu": 2314,
+                                        "count-tamiflu": 1289,
+                                        "set": 1,
+                                        "year": "2022-9"
+                                    },
+                                    {
+                                        "category": "East",
+                                        "count-eraflu": 44,
+                                        "count-tamiflu": 143,
+                                        "set": 1,
+                                        "year": "2022-10"
+                                    },
+                                    {
+                                        "category": "Kaohisung/Pingtung",
+                                        "count-eraflu": 423,
+                                        "count-tamiflu": 408,
+                                        "set": 1,
+                                        "year": "2022-10"
+                                    },
+                                    {
+                                        "category": "South",
+                                        "count-eraflu": 702,
+                                        "count-tamiflu": 691,
+                                        "set": 1,
+                                        "year": "2022-10"
+                                    },
+                                    {
+                                        "category": "North",
+                                        "count-eraflu": 1089,
+                                        "count-tamiflu": 1975,
+                                        "set": 1,
+                                        "year": "2022-10"
+                                    },
+                                    {
+                                        "category": "Middle",
+                                        "count-eraflu": 1460,
+                                        "count-tamiflu": 1646,
+                                        "set": 1,
+                                        "year": "2022-10"
+                                    },
+                                    {
+                                        "category": "Taipei",
+                                        "count-eraflu": 2314,
+                                        "count-tamiflu": 2037,
+                                        "set": 1,
+                                        "year": "2022-10"
+                                    },
+                                    {
+                                        "category": "East",
+                                        "count-eraflu": 44,
+                                        "count-tamiflu": 227,
+                                        "set": 1,
+                                        "year": "2022-11"
+                                    },
+                                    {
+                                        "category": "Kaohisung/Pingtung",
+                                        "count-eraflu": 423,
+                                        "count-tamiflu": 655,
+                                        "set": 1,
+                                        "year": "2022-11"
+                                    },
+                                    {
+                                        "category": "South",
+                                        "count-eraflu": 702,
+                                        "count-tamiflu": 916,
+                                        "set": 1,
+                                        "year": "2022-11"
+                                    },
+                                    {
+                                        "category": "Middle",
+                                        "count-eraflu": 1460,
+                                        "count-tamiflu": 1979,
+                                        "set": 1,
+                                        "year": "2022-11"
+                                    },
+                                    {
+                                        "category": "North",
+                                        "count-eraflu": 1089,
+                                        "count-tamiflu": 2365,
+                                        "set": 1,
+                                        "year": "2022-11"
+                                    },
+                                    {
+                                        "category": "Taipei",
+                                        "count-eraflu": 2314,
+                                        "count-tamiflu": 2653,
+                                        "set": 1,
+                                        "year": "2022-11"
+                                    },
+                                    {
+                                        "category": "East",
+                                        "count-eraflu": 44,
+                                        "count-tamiflu": 628,
+                                        "set": 1,
+                                        "year": "2022-12"
+                                    },
+                                    {
+                                        "category": "Kaohisung/Pingtung",
+                                        "count-eraflu": 423,
+                                        "count-tamiflu": 1573,
+                                        "set": 1,
+                                        "year": "2022-12"
+                                    },
+                                    {
+                                        "category": "South",
+                                        "count-eraflu": 714,
+                                        "count-tamiflu": 1946,
+                                        "set": 1,
+                                        "year": "2022-12"
+                                    },
+                                    {
+                                        "category": "North",
+                                        "count-eraflu": 1089,
+                                        "count-tamiflu": 4189,
+                                        "set": 1,
+                                        "year": "2022-12"
+                                    },
+                                    {
+                                        "category": "Middle",
+                                        "count-eraflu": 1487,
+                                        "count-tamiflu": 4897,
+                                        "set": 1,
+                                        "year": "2022-12"
+                                    },
+                                    {
+                                        "category": "Taipei",
+                                        "count-eraflu": 2465,
+                                        "count-tamiflu": 6280,
+                                        "set": 1,
+                                        "year": "2022-12"
+                                    }
+                                ];
+                                
+                    const classes = ['Eraflu', 'Tamiflu'];
+                    const svg = d3.select("svg");
+                    const margin = { top: 50, right: 100, bottom: 30, left: 150 };
+                    const width = +svg.attr("width") - margin.left - margin.right;
+                    const height = +svg.attr("height") - margin.top - margin.bottom;
+                    
+                    const categories = Array.from(new Set(data.map(d => d.category)));
+                    const sets = Array.from(new Set(data.map(d => d.set)));
+
+                    const x = d3.scaleLinear()
+                        .domain([0, d3.max(data, d => d["count-eraflu"] + d["count-tamiflu"])])
+                        .nice()
+                        .range([0, width]);
+
+                    let y0 = d3.scaleBand()
+                        .range([0, height])
+                        .padding(0.2);
+
+                    const y1 = d3.scaleBand()
+                        .domain(sets)
+                        .range([0, y0.bandwidth()])
+                        .padding(0.1);
+
+                    const color = d3.scaleOrdinal()
+                        .domain(["count-eraflu", "count-tamiflu"])
+                        .range(["#1f77b4", "#ff7f0e"]);
+
+                    const stack = d3.stack()
+                        .keys(["count-eraflu", "count-tamiflu"])
+                        .order(d3.stackOrderNone)
+                        .offset(d3.stackOffsetNone);
+
+                    const g = svg.append("g")
+                        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+                    const xAxis = g.append("g")
+                        .attr("class", "x-axis")
+                        .attr("transform", `translate(0,${height})`);
+
+                    const yAxis = g.append("g")
+                        .attr("class", "y-axis");
+
+                    const bars = g.append("g")
+                        .attr("class", "bars");
+
+                    const legend = svg.append("g")
+                        .attr("transform", `translate(${margin.left + width + 20},${margin.top})`)
+                        .attr("class", "legend");
+
+                    const legendData = [
+                        { label: "Eraflu", color: "#1f77b4" },
+                        { label: "Tamiflu", color: "#ff7f0e" }
+                    ];
+
+                    legendData.forEach((d, i) => {
+                        const legendItem = legend.append("g")
+                            .attr("transform", `translate(0,${i * 20})`);
+
+                        legendItem.append("rect")
+                            .attr("x", 0)
+                            .attr("width", 18)
+                            .attr("height", 18)
+                            .attr("fill", d.color);
+
+                        legendItem.append("text")
+                            .attr("x", 25)
+                            .attr("y", 15)
+                            .text(d.label);
+
+                        legendItem.on("mouseover", function(event, d2) {
+                            // Highlight bars of the hovered class and make others transparent
+                            const index = classes.indexOf(d.label);
+                            svg.selectAll(".bar")
+                                .attr("class", function () {
+                                    const barClass = this.getAttribute("data-layer-id");
+                                    return barClass == index ? "bar highlighted" : "bar transparent";
+                                });
+                        })
+                        .on("mouseout", function () {
+                            // Reset all bars to default style
+                            svg.selectAll(".bar")
+                                .attr("class", "bar");
+                        });
+                    });
+
+                    const yearLabel = svg.append("text")
+                        .attr("class", "year-label")
+                        .attr("x", margin.left)
+                        .attr("y", margin.top / 2)
+                        .text(`Year: ${data[0].year}`);
+
+                        function update(year) {
+                            const yearData = data.filter(d => d.year === year);
+
+                            yearData.forEach(d => d.total = d["count-eraflu"] + d["count-tamiflu"]);
+
+                            const sortedCategories = yearData
+                                .map(d => d.category)
+                                .filter((v, i, a) => a.indexOf(v) === i)
+                                .sort((a, b) => {
+                                    const totalA = yearData.filter(d => d.category === a).reduce((sum, d) => sum + d.total, 0);
+                                    const totalB = yearData.filter(d => d.category === b).reduce((sum, d) => sum + d.total, 0);
+                                    return totalB - totalA;
+                                });
+
+                            y0.domain(sortedCategories);
+                            const series = stack(yearData);
+                            x.domain([0, d3.max(yearData, d => d.total)]).nice();
+
+                            // Transition the x-axis
+                            xAxis.transition()
+                                .duration(200)
+                                .call(d3.axisBottom(x));
+
+                            // Transition the y-axis
+                            yAxis.transition()
+                                .duration(200)
+                                .call(d3.axisLeft(y0));
+
+                            // Set the font size for the y-axis labels
+                            yAxis.selectAll("text")
+                                .style("font-size", "14px");
+
+                            const barsSelection = bars.selectAll(".layer")
+                                .data(series, d => d.key);
+
+                            // Enter and merge selection for bars
+                            const layers = barsSelection.enter().append("g")
+                                .attr("class", "layer")
+                                .attr("fill", d => color(d.key))
+                                .attr("id", d => d.index)
+                                .merge(barsSelection);
+
+                            const rects = layers.selectAll("rect")
+                                .data(d => d, d => d.data.category) // Key function for bars
+                                .join(
+                                    enter => enter.append("rect")
+                                        .attr("class", "bar")
+                                        .attr("data-layer-id", function(d) {
+                                            return (d3.select(this.parentNode).attr("id"));
+                                        })
+                                        .attr("x", x(0)) // Start from 0
+                                        .attr("y", d => y0(d.data.category) + 8)
+                                        .attr("width", 0) // Start width for entering bars
+                                        .attr("height", y1.bandwidth() / 7)
+                                        .transition()
+                                        .duration(200)
+                                        .attr("x", d => x(d[0]))
+                                        .attr("width", d => x(d[1]) - x(d[0])),
+                                    update => update
+                                        .transition()
+                                        .duration(200)
+                                        .attr("x", d => x(d[0]))
+                                        .attr("width", d => x(d[1]) - x(d[0]))
+                                        .attr("y", d => y0(d.data.category) + 8),  // Smooth position transition
+                                    exit => exit
+                                        .transition()
+                                        .duration(200)
+                                        .attr("width", 0) // Shrink to zero
+                                        .remove()
+                                );
+
+                            // Add labels on the bars
+                            const labels = layers.selectAll("text")
+                                .data(d => d, d => d.data.category) // Key function for labels
+                                .join(
+                                    enter => enter.append("text")
+                                        .attr("class", "bar-label")
+                                        .attr("x", x(0) + 3)
+                                        .attr("y", d => y0(d.data.category) + 30)
+                                        .attr("dy", ".35em")
+                                        .attr("fill", "darkred")
+                                        .text(function(d){
+                                            let bar_value = '0';
+                                            const layer_id = d3.select(this.parentNode).attr("id");
+                                            if(layer_id === '0'){
+                                                bar_value = '';
+                                            }else if(layer_id === '1'){
+                                                bar_value = (d.data["count-eraflu"]+d.data["count-tamiflu"]).toString();
+                                            }
+                                            return(bar_value);
+                                        })
+                                        .transition()
+                                        .duration(200)
+                                        .attr("x", d => x(d[1]) + 3)
+                                        .attr("y", d => y0(d.data.category)+27),
+                                    update => update
+                                        .transition()
+                                        .duration(200)
+                                        .attr("x", d => x(d[1]) + 3)
+                                        .attr("y", d => y0(d.data.category)+27)
+                                        .text(function(d){
+                                            let bar_value = '0';
+                                            const layer_id = d3.select(this.parentNode).attr("id");
+                                            if(layer_id === '0'){
+                                                bar_value = '';
+                                            }else if(layer_id === '1'){
+                                                bar_value = (d.data["count-eraflu"]+d.data["count-tamiflu"]).toString();
+                                            }
+                                            return(bar_value);
+                                        }),
+                                    exit => exit
+                                        .transition()
+                                        .duration(200)
+                                        .attr("opacity", 0)
+                                        .remove()
+                                );
+
+                            // Remove old layers
+                            barsSelection.exit().remove();
+
+                            yearLabel.text(`Year: ${year}`);
+                        }
+
+                    const years = Array.from(new Set(data.map(d => d.year)));
+                    let currentYearIndex = 0;
+                    let animationInterval;
+
+                    function animate() {
+                        update(years[currentYearIndex]);
+                        currentYearIndex = (currentYearIndex + 1) % years.length;
+                    }
+
+                    document.getElementById('startAnimation').addEventListener('click', () => {
+                        if (animationInterval) {
+                            clearInterval(animationInterval);
+                        }
+                        animate();
+                        animationInterval = setInterval(animate, 200); // Change year every 1 second
+                    });
+
+                    document.getElementById('stopAnimation').addEventListener('click', () => {
+                        if (animationInterval) {
+                            clearInterval(animationInterval);
+                            animationInterval = null;
+                        }
+                    });
+
+                    update(years[currentYearIndex]);
+        </script>
+    </body>
+</html>
